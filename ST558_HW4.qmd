@@ -61,7 +61,7 @@ getRMSE <- function(observation_vector, prediction_vector, ...){
 ```
 
 
-# Question 2 - generate fake data test RMSE function
+# Question 2 - generate fake data and test RMSE function
 ```{r}
 #| eval: true
 
@@ -124,7 +124,7 @@ getMAE <- function(observation_vector, prediction_vector, ...){
 }
 ```
 
-# Question 4 - generate fake data test MAE function
+# Question 4 - generate fake data and test MAE function
 ```{r}
 #| eval: true
 
@@ -169,7 +169,8 @@ mae_NAs_w_arguement
 ```{r}
 #| eval: true
 
-getSTATS <- function(observation_vector, prediction_vector, ...){
+# define metrics function with default statistics
+getMetrics <- function(observation_vector, prediction_vector, statistics = c('RMSE', 'MAE'), ...){
   
   # check to make sure inputs are correct type
   if(!is.vector(observation_vector) | !is.atomic(observation_vector) | !is.numeric(observation_vector)){
@@ -179,12 +180,93 @@ getSTATS <- function(observation_vector, prediction_vector, ...){
     stop('prediction_vector is not an atomic numeric vector')
   }
   
+  # create a list to store the statistics
+  output_statistics <- list()
   
+  # calculate statistics conditionally
+  if('RMSE' %in% statistics){
+    output_statistics$RMSE <- getRMSE(observation_vector, prediction_vector, ...)
+  } 
+  if ('MAE' %in% statistics){
+    output_statistics$MAE <- getMAE(observation_vector, prediction_vector, ...)
+  }
+  
+  # calculate everything if no valid inputs given
+  if (length(output_statistics) == 0) {
+    output_statistics$RMSE <- getRMSE(observation_vector, prediction_vector, ...)
+    output_statistics$MAE <- getMAE(observation_vector, prediction_vector, ...)
+  }
+  
+  # return metrics
+  return(output_statistics)
 }
 
 ```
 
+# Question 6 - generate fake data and test wrapper
+```{r}
 
+# set seed for reproducibility
+set.seed(10)
+
+# generate fake data
+n <- 100
+x <- runif(n)
+resp <- 3 + 10*x + rnorm(n)
+pred <- predict(lm(resp ~ x), data.frame(x))
+
+# call wrapper and generate stats
+mae <- getMetrics(
+  observation_vector = resp,
+  prediction_vector = pred,
+  statistics = 'MAE'
+)
+rmse <- getMetrics(
+  observation_vector = resp,
+  prediction_vector = pred,
+  statistics = 'RMSE'
+)
+all_statistics <- getMetrics(
+  observation_vector = resp,
+  prediction_vector = pred,
+  statistics = c('MAE', 'RMSE')
+)
+
+# add NAs to response data
+resp_na <- resp
+resp_na[c(3, 88)] <- NA_real_
+
+# call wrapper and generate stats on missing data
+mae_NAs <- getMetrics(
+  observation_vector = resp_na,
+  prediction_vector = pred,
+  statistics = 'MAE',
+  na.rm = TRUE
+)
+rmse_NAs <- getMetrics(
+  observation_vector = resp_na,
+  prediction_vector = pred,
+  statistics = 'RMSE',
+  na.rm = TRUE
+)
+all_statistics_NAs <- getMetrics(
+  observation_vector = resp_na,
+  prediction_vector = pred,
+  statistics = c('MAE', 'RMSE'),
+  na.rm = TRUE
+)
+
+# print results
+mae
+mae_NAs
+
+rmse
+rmse_NAs
+
+all_statistics
+all_statistics_NAs
+
+```
 
 # Task 3
 # Your API key is: f07771c038d24e65aeaf85752af8bb4a
