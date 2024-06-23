@@ -15,8 +15,8 @@ editor: visual
 
 lapply(
   X = my_list,
- FUN = cor,
- method = 'kendall'
+  FUN = cor,
+  method = 'kendall'
 )
 
 ```
@@ -36,7 +36,7 @@ lapply(
 
 # Task 1: writing R functions
 
-# Question 1 - writing a function to calculate RMSE
+### Question 1 - writing a function to calculate RMSE
 ```{r}
 #| eval: true
 
@@ -61,7 +61,7 @@ getRMSE <- function(observation_vector, prediction_vector, ...){
 ```
 
 
-# Question 2 - generate fake data and test RMSE function
+### Question 2 - generate fake data and test RMSE function
 ```{r}
 #| eval: true
 
@@ -103,7 +103,7 @@ rmse_NAs_w_arguement
 #mean(resp_na)
 ```
 
-# Question 3 - writing a function to calculate MAE
+### Question 3 - writing a function to calculate MAE
 ```{r}
 #| eval: true
 
@@ -124,7 +124,7 @@ getMAE <- function(observation_vector, prediction_vector, ...){
 }
 ```
 
-# Question 4 - generate fake data and test MAE function
+### Question 4 - generate fake data and test MAE function
 ```{r}
 #| eval: true
 
@@ -165,7 +165,7 @@ mae_NAs_no_arguement
 mae_NAs_w_arguement
 ```
 
-# Question 5 - create a wrapper for MAE and RMSE functions
+### Question 5 - create a wrapper for MAE and RMSE functions
 ```{r}
 #| eval: true
 
@@ -203,7 +203,7 @@ getMetrics <- function(observation_vector, prediction_vector, statistics = c('RM
 
 ```
 
-# Question 6 - generate fake data and test wrapper
+### Question 6 - generate fake data and test wrapper
 ```{r}
 
 # set seed for reproducibility
@@ -271,13 +271,40 @@ all_statistics_NAs
 # Task 3
 # Your API key is: f07771c038d24e65aeaf85752af8bb4a
 
+```{r}
+# load lribaries
+library(httr)
+library(jsonlite)
 
+# set api key
+api_key <- 'f07771c038d24e65aeaf85752af8bb4a'
+```
 
+### Question 1 - get API data
+```{r}
 
+# get libraries
+library(httr)
+library(jsonlite)
+library(magrittr)
+library(purrr)
 
+# set url for API
+url <- 'https://newsapi.org/v2/everything?q=tesla&from=2024-05-23&sortBy=publishedAt&apiKey=f07771c038d24e65aeaf85752af8bb4a'
 
+# get the data form the API
+url_data <- httr::GET(url) |>
+  # parse the content as text
+  content(as = 'text') |>
+  # convert json to R df
+  fromJSON(flatten = TRUE, simplifyDataFrame = TRUE) 
+  # pull specified section
+  pluck('articles')
+  
+# print results
+url_data
 
-
+```
 
 
 
