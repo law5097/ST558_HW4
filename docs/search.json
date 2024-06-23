@@ -1,0 +1,9 @@
+[
+  {
+    "objectID": "ST558_HW4.html",
+    "href": "ST558_HW4.html",
+    "title": "ST558_HW4 - Lee Worthington",
+    "section": "",
+    "text": "lapply() is the baseR function that applies a function to every element in a list individually. For instance you could use lapply() to find the mean of the values in element 1, then the mean of the values in element 2, etc\n\n\n\n\n\nlapply(\n  X = my_list\n ,FUN = cor\n ,method = 'kendall'\n)\n\n\n\n\n\npurrr functions:\n\nHave helper functions that help reduce code\nThere is much greater consistency between purrr functions compared to the apply family in terms of arguements, options, etc\n\n\n\n\n\n\nSide effect functions do not try to change/transform the data being passed to them, rather they try to produce something from the data, such as print()/plot() which generate output from the data as opposed to altering the original data\n\n\n\n\n\nCalling a function creates a temporary environment that cease to exists after the function executes, so the variable sd only exists in the temporary environment while the function is running, it never exists in the global environment and therefore cannot cause any errors."
+  }
+]

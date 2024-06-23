@@ -1,0 +1,205 @@
+---
+title: "ST558_HW4 - Lee Worthington"
+format: html
+editor: visual
+---
+
+# Task 1: conceptual questions
+
+### Question 1 - What is the purpose of the lapply() function? What is the equivalent purrr function?
+> lapply() is the baseR function that applies a function to every element in a list individually. For instance, you could use lapply() to find the mean of the values in element 1, then the mean of the values in element 2, etc. The equivalent purrr function is map()
+
+### Question 2 - code to use lapply() and cor()
+```{r}
+#| eval: false
+
+lapply(
+  X = my_list,
+ FUN = cor,
+ method = 'kendall'
+)
+
+```
+
+### Question 3 - what are the two advantages of using purrr functions isntead of the baseR apply family?
+> purrr functions:
+>
+> - Have helper functions that improve functionality/readability, such as the map_*() functions
+> - There is much greater consistency between purrr functions compared to the apply family in terms of arguements, output, options, etc
+
+### Question 4 - what is a side effect function?
+> Side effect functions do not try to change/transform the data being passed to them, rather they try to produce something (side effects) from the data. Examples owuld be print()/plot() which generate output from the data without altering it
+
+
+### Question 5 - why can you name a variable sd in a function and not cause any issues with the sd function?
+> The variable sd defined in the function only exists in the temporary environment and scope of the function, so it only exists while the function is running and therefore cannot cause any errors with the global environment.
+
+# Task 1: writing R functions
+
+# Question 1 - writing a function to calculate RMSE
+```{r}
+#| eval: true
+
+# define function
+getRMSE <- function(observation_vector, prediction_vector, ...){
+  
+  # calculate differences in vector
+  differences <- observation_vector - prediction_vector
+  
+  # square the difference
+  squared_differences <- differences^2
+  
+  # calculate the mean of the squared diffs, with optional argument
+  avg_differences <- mean(squared_differences, ...)
+  
+  # take the root
+  rmse <- sqrt(avg_differences)
+  
+  # return rmse
+  return(rmse)
+}
+```
+
+
+# Question 2 - generate fake data test RMSE function
+```{r}
+#| eval: true
+
+# set seed for reproducibility
+set.seed(10)
+
+# generate fake data
+n <- 100
+x <- runif(n)
+resp <- 3 + 10*x + rnorm(n)
+pred <- predict(lm(resp ~ x), data.frame(x))
+
+# test getRMSE function on original data
+rmse_original <- getRMSE(
+  observation_vector = resp,
+  prediction_vector = pred
+)
+
+# add NAs to response data
+resp_na <- resp
+resp_na[c(3, 88)] <- NA_real_
+
+# test getRMSE function on NA induced data
+rmse_NAs_no_arguement <- getRMSE(
+  observation_vector = resp_na,
+  prediction_vector = pred
+)
+
+rmse_NAs_w_arguement <- getRMSE(
+  observation_vector = resp_na,
+  prediction_vector = pred,
+  na.rm = TRUE
+)
+
+# print results
+rmse_original
+rmse_NAs_no_arguement
+rmse_NAs_w_arguement
+#mean(resp_na)
+```
+
+# Question 3 - writing a function to calculate MAE
+```{r}
+#| eval: true
+
+# define function
+getMAE <- function(observation_vector, prediction_vector, ...){
+  
+  # calculate differences in vector
+  differences <- observation_vector - prediction_vector
+  
+  # get the absolute differences
+  absolute_differences <- abs(differences)
+  
+  # calculate the mean of the absolute diffs, with optional argument
+  mae <- mean(absolute_differences, ...)
+  
+  # return mae
+  return(mae)
+}
+```
+
+# Question 4 - generate fake data test MAE function
+```{r}
+#| eval: true
+
+# set seed for reproducibility
+set.seed(10)
+
+# generate fake data
+n <- 100
+x <- runif(n)
+resp <- 3 + 10*x + rnorm(n)
+pred <- predict(lm(resp ~ x), data.frame(x))
+
+# test getMAE function on original data
+mae_original <- getMAE(
+  observation_vector = resp,
+  prediction_vector = pred
+)
+
+# add NAs to response data
+resp_na <- resp
+resp_na[c(3, 88)] <- NA_real_
+
+# test getMAE function on NA induced data
+mae_NAs_no_arguement <- getRMSE(
+  observation_vector = resp_na,
+  prediction_vector = pred
+)
+
+mae_NAs_w_arguement <- getRMSE(
+  observation_vector = resp_na,
+  prediction_vector = pred,
+  na.rm = TRUE
+)
+
+# print results
+mae_original
+mae_NAs_no_arguement
+mae_NAs_w_arguement
+```
+
+# Question 5 - create a wrapper for MAE and RMSE functions
+```{r}
+#| eval: true
+
+getSTATS <- function(observation_vector, prediction_vector, ...){
+  
+  # check to make sure inputs are correct type
+  if(!is.vector(observation_vector) | !is.atomic(observation_vector) | !is.numeric(observation_vector)){
+    stop('observation_vector is not an atomic numeric vector')
+  }
+  if(!is.vector(prediction_vector) | !is.atomic(prediction_vector) | !is.numeric(prediction_vector)){
+    stop('prediction_vector is not an atomic numeric vector')
+  }
+  
+  
+}
+
+```
+
+
+
+# Task 3
+# Your API key is: f07771c038d24e65aeaf85752af8bb4a
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
