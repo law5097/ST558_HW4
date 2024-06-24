@@ -4,12 +4,27 @@ format: html
 editor: visual
 ---
 
-# Task 1: conceptual questions
+## Setup environment
+
+```{r}
+#| warning: FALSE
+#| message: FALSE
+
+library(httr)
+library(jsonlite)
+library(magrittr)
+library(purrr)
+library(dplyr)
+```
+
+## Task 1: conceptual questions
 
 ### Question 1 - What is the purpose of the lapply() function? What is the equivalent purrr function?
+
 > lapply() is the baseR function that applies a function to every element in a list individually. For instance, you could use lapply() to find the mean of the values in element 1, then the mean of the values in element 2, etc. The equivalent purrr function is map()
 
 ### Question 2 - code to use lapply() and cor()
+
 ```{r}
 #| eval: false
 
@@ -22,21 +37,24 @@ lapply(
 ```
 
 ### Question 3 - what are the two advantages of using purrr functions isntead of the baseR apply family?
+
 > purrr functions:
 >
-> - Have helper functions that improve functionality/readability, such as the map_*() functions
-> - There is much greater consistency between purrr functions compared to the apply family in terms of arguements, output, options, etc
+> -   Have helper functions that improve functionality/readability, such as the map\_\*() functions
+> -   There is much greater consistency between purrr functions compared to the apply family in terms of arguements, output, options, etc
 
 ### Question 4 - what is a side effect function?
+
 > Side effect functions do not try to change/transform the data being passed to them, rather they try to produce something (side effects) from the data. Examples owuld be print()/plot() which generate output from the data without altering it
 
-
 ### Question 5 - why can you name a variable sd in a function and not cause any issues with the sd function?
+
 > The variable sd defined in the function only exists in the temporary environment and scope of the function, so it only exists while the function is running and therefore cannot cause any errors with the global environment.
 
-# Task 1: writing R functions
+## Task 2: writing R functions
 
 ### Question 1 - writing a function to calculate RMSE
+
 ```{r}
 #| eval: true
 
@@ -60,8 +78,8 @@ getRMSE <- function(observation_vector, prediction_vector, ...){
 }
 ```
 
-
 ### Question 2 - generate fake data and test RMSE function
+
 ```{r}
 #| eval: true
 
@@ -100,10 +118,10 @@ rmse_NAs_w_arguement <- getRMSE(
 rmse_original
 rmse_NAs_no_arguement
 rmse_NAs_w_arguement
-#mean(resp_na)
 ```
 
 ### Question 3 - writing a function to calculate MAE
+
 ```{r}
 #| eval: true
 
@@ -125,6 +143,7 @@ getMAE <- function(observation_vector, prediction_vector, ...){
 ```
 
 ### Question 4 - generate fake data and test MAE function
+
 ```{r}
 #| eval: true
 
@@ -148,12 +167,12 @@ resp_na <- resp
 resp_na[c(3, 88)] <- NA_real_
 
 # test getMAE function on NA induced data
-mae_NAs_no_arguement <- getRMSE(
+mae_NAs_no_arguement <- getMAE(
   observation_vector = resp_na,
   prediction_vector = pred
 )
 
-mae_NAs_w_arguement <- getRMSE(
+mae_NAs_w_arguement <- getMAE(
   observation_vector = resp_na,
   prediction_vector = pred,
   na.rm = TRUE
@@ -166,6 +185,7 @@ mae_NAs_w_arguement
 ```
 
 ### Question 5 - create a wrapper for MAE and RMSE functions
+
 ```{r}
 #| eval: true
 
@@ -204,6 +224,7 @@ getMetrics <- function(observation_vector, prediction_vector, statistics = c('RM
 ```
 
 ### Question 6 - generate fake data and test wrapper
+
 ```{r}
 
 # set seed for reproducibility
@@ -256,59 +277,101 @@ all_statistics_NAs <- getMetrics(
   na.rm = TRUE
 )
 
-# print results
+# print no NA data
 mae
-mae_NAs
-
 rmse
-rmse_NAs
-
 all_statistics
+
+# print NA data
+mae_NAs
+rmse_NAs
 all_statistics_NAs
 
+# pass incorrect data structure (should return an error)
+try({
+  mae <- getMetrics(
+    observation_vector = as.data.frame(c('1', 'a')),
+    prediction_vector = as.data.frame(c('1', 'a')),
+    statistics = 'MAE'
+  )
+})
 ```
 
-# Task 3
-# Your API key is: f07771c038d24e65aeaf85752af8bb4a
-
-```{r}
-# load lribaries
-library(httr)
-library(jsonlite)
-
-# set api key
-api_key <- 'f07771c038d24e65aeaf85752af8bb4a'
-```
+## Task 3: querying APIs
 
 ### Question 1 - get API data
-```{r}
 
-# get libraries
-library(httr)
-library(jsonlite)
-library(magrittr)
-library(purrr)
+```{r}
+# set api key
+api_key <- 'f07771c038d24e65aeaf85752af8bb4a'
 
 # set url for API
-url <- 'https://newsapi.org/v2/everything?q=tesla&from=2024-05-23&sortBy=publishedAt&apiKey=f07771c038d24e65aeaf85752af8bb4a'
+url <- 'https://newsapi.org/v2/everything?q=tesla&from=2024-05-29&sortBy=publishedAt&apiKey=f07771c038d24e65aeaf85752af8bb4a'
 
 # get the data form the API
-url_data <- httr::GET(url) |>
-  # parse the content as text
-  content(as = 'text') |>
-  # convert json to R df
-  fromJSON(flatten = TRUE, simplifyDataFrame = TRUE) 
-  # pull specified section
-  pluck('articles')
-  
-# print results
-url_data
-
+url_data <- httr::GET(url)
 ```
 
+### Question 2 - pull the article data
 
+```{r}
+# call url_data
+articles <- url_data |>
+  
+  # parse the url_data as text
+  httr::content(as = 'text') |>
+  
+  # convert the JSON text into a dataframe format
+  fromJSON(flatten = TRUE, simplifyDataFrame = TRUE) |>
+  
+  # pull specified element named articles, which is a list of 10 elements
+  pluck('articles') |>
+  
+  # grab the content column
+  select(content)
 
+# print results
+head(articles$content, 5)
+```
 
+### Question 3 - api function
 
+```{r}
 
+# create function
+query_api <- function(subject, start_date, api_key){
+  
+  # set base url
+  url <- 'https://newsapi.org/v2/everything'
+  
+  # make a request to the API
+  url_data <- httr::GET(url, query = list(
+    q = subject,
+    from = start_date,
+    sortBy = 'publishedAt',
+    apiKey = api_key
+  ))
+  
+  # parse the article data
+  content <- url_data |>
+    
+    # parse the url_data as text
+    httr::content(as = 'text') |>
+    
+    # convert the JSON text into a dataframe format
+    fromJSON(flatten = TRUE, simplifyDataFrame = TRUE) |>
+    
+    # pull specified element named articles, which is a list of 10 elements
+    pluck('articles') |>
+    
+    # grab the content column
+    select(content)
+  
+  # return results
+  return(content)
+}
 
+# test function (dont forget time limit)
+head(query_api('science', '06-06-2024', 'f07771c038d24e65aeaf85752af8bb4a')$content, 5)
+head(query_api('politics USA', '06-06-2024', 'f07771c038d24e65aeaf85752af8bb4a')$content, 5)
+```
